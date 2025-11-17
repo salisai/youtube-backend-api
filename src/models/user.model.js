@@ -2,7 +2,7 @@ import mongoose, {Schema} from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-
+//define UserSchema
 const userSchema = new Schema(
     {
       username : {
@@ -10,8 +10,7 @@ const userSchema = new Schema(
         required : true,
         unique : true,
         lowercase : true,
-        trim: true,
-        index : true  //searching field agar enable karna ho
+        trim: true,  
       },
       email : {
         type : String,
@@ -19,6 +18,7 @@ const userSchema = new Schema(
         unique : true,
         lowercase : true,
         trim: true,
+        match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
       },
       fullname : {
         type : String,
@@ -27,11 +27,10 @@ const userSchema = new Schema(
         index : true
       },
       avatar : {
-        type : String, //cloudinary url
-        required : true  
+        type : String, 
       },
       coverImage : {
-        type : String
+        type : String //url 
       },
       watchHistory :  [
         {
@@ -41,35 +40,44 @@ const userSchema = new Schema(
       ],
       password : {
         type : String,
-        required : [true, "Password is required"]
+        required : [true, "Password is required"],
+        minlength: 6
       },
-      refreshToken : {
+      refreshToken : { 
         type : String
       }
     },
     {timestamps : true}
 )
 
-userSchema.pre("save",async function (next){
-    if(!this.isModified("password")) return next();//agar modified nahi howa tho next pa jao direct
-    //  without even runnign thecode below
-    this.password = await bcrypt.hash(this.password,10)
-    next()
-})//encryption => complex therefore we use asunc here
 
-userSchema.methods.isPasswordCorrect = async function
-(password) {
-    //this.password => encrypted password
-    return await bcrypt.compare(password, this.password,)
+userSchema.pre("save",async function (next){
+    if(!this.isModified("password")) return next();
+   
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next()
+})
+
+//hide sensitive fields
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  delete user.refreshToken;
+  return user;
 }
+
+
+userSchema.methods.isPasswordCorrect = async function(password) {
+    return await bcrypt.compare(password, this.password,)// this.password => encrypted password
+}
+
 
 userSchema.methods.generateAccessToken = function (){
     return jwt.sign(
-        {
+        {//payload
             _id : this._id,
-            email : this.email,
             username : this.username,
-            fullname : this.fullname
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -77,13 +85,13 @@ userSchema.methods.generateAccessToken = function (){
         }
     )
 }
+
+
+//for identity check 
 userSchema.methods.generateRefreshToken = function (){ 
     return jwt.sign(
         {
-            _id : this._id,
-            email : this.email,
-            username : this.username,
-            fullname : this.fullname
+            _id : this._id
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
@@ -92,5 +100,14 @@ userSchema.methods.generateRefreshToken = function (){
     )
 }
 
+//on logout invalidate
+userSchema.methods.invalidateRefreshToken = function () {
+  this.refreshToken = null;
+  return this.save({validateBeforeSave: false});
+}
 
 export const User = mongoose.model("User",userSchema);
+
+
+
+

@@ -1,0 +1,53 @@
+
+What is JSON web Token: (JWT) for secure web applications
+
+=> compact, URL-safe way of representing claims between two parties.
+
+JWTs are often used for securely transmitting information between parties because they can be verified and trusted as they are signed.
+
+Typicall JWT consists of three parts:
+1. Header: token type(JWT) and signing algorithm like HS265, HMAC SHA-256
+
+2.Payload: carries user data, session information etc. you can custom claims like user roles or exploration
+
+3.Signature: ensures the integrity and authenticity of the token using a secret key.
+
+like: header.payload.Signature
+
+
+
+working?
+
+Authentication: 
+  when someone logs into a website or app. After the login the server creates a token, sends it to the user's browser and the browser uses this token for future requests to show that the user is logged in.
+  
+  Instead of the server checking the user's session every time, the JWT can prove that the user is authenticated. Unlike session-based authentication, JWT-based authentication doesn't require the server to store session data. It is stateless and scalable.
+
+  for future requests the client includes this JWT in the Authorization header(Bearer).
+  The server verifies the JWT's signature to confirm that the request is authenticated.
+
+
+Authorization:
+   JWT can store information about, what a user is allowed to do (like access specific pages or resources). So, when a user tries to access something, the JWT tells the server whether they have permission or not.
+  
+
+Stateless sessions: 
+   Normally when a user logs in, the server has to remember the user in its memory. But with JWT, the token carries all the needed information, so the server doesn't have to remember anything. This is called statelesss because the server doesn't keep the track of the user's session.
+
+
+Signle Sign-On:(SSO)
+   systems where one login allows access to many different apps or services without needing to log in again.
+
+  
+
+
+JWT implemenations:
+
+storing JWT: either in local storage or cookies.
+localStorage: easier but vulnerable to XSS(cross-site scripting) attack.
+
+HTTP-only cookies: more secure against XSS but requries careful handling to avoid CSRF attack.
+
+Authorization: Bearer <token>
+
+Use tools like Axios interceptors or other middlewares in your frontend framwork to check for expiration and refresh tokens automatically.
