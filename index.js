@@ -1,10 +1,9 @@
 // require('dotenv').config({path: './env'}); 
 //this above is also right but not modular and cosistent
 
-import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./src/db/index.js";
-const app = express();
+import { app } from "./src/app.js";
 
 //to use app you must import express 
 

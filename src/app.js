@@ -28,22 +28,67 @@ app.use(cookieParser());
 //routes import karna idhar
 //cuz we do this in case of routes
 import userRouter from "./routes/user.routes.js";
+import videoRouter from "./routes/video.routes.js";
+import commentRouter from "./routes/comment.routes.js";
+import likeRouter from "./routes/like.routes.js";
+import subscriptionRouter from "./routes/subscription.routes.js";
+import playlistRouter from "./routes/playlist.routes.js";
+import dashboardRouter from "./routes/dashboard.routes.js";
+import healthcheckRouter from "./routes/healthcheck.routes.js";
+import tweetRouter from "./routes/tweet.routes.js";
+
+// Import error handling utilities
+import { ApiError } from "./utils/ApiError.js";
 
 //usage?
 //routes declarations:
-app.use("/api/v1/users",userRouter);//we give control to user router ,when some enter this url
-//userRouter , user.router file mai jayega 
-//kahe ga k mai control aap ko paas kar raha ho mujhe bataye k kia karna hai
-//here /users become prefix
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/videos", videoRouter);
+app.use("/api/v1/comments", commentRouter);
+app.use("/api/v1/likes", likeRouter);
+app.use("/api/v1/subscriptions", subscriptionRouter);
+app.use("/api/v1/playlists", playlistRouter);
+app.use("/api/v1/dashboard", dashboardRouter);
+app.use("/api/v1/healthcheck", healthcheckRouter);
+app.use("/api/v1/tweets", tweetRouter);
 
-//http://localhost:8000/api/v1/users/register
-//jese aap /users pay gaye controll jaeyga direct user.routes par 
-//yaha pa kuch change nahi aaeyga 
-//user ka bad jitnay bhi methods likhay jaeyngay wo user.route mai   
+// Test route
 app.get('/test', (req, res) => {
     res.send('Test route working!');
 });
-export {app}
+
+// Error handling middleware (must be after all routes)
+app.use((err, req, res, next) => {
+    // If error is an instance of ApiError, use its properties
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json({
+            success: false,
+            message: err.message,
+            errors: err.errors,
+            data: err.data
+        });
+    }
+
+    // For other errors, return a generic error response
+    return res.status(err.statusCode || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+        errors: [],
+        data: null
+    });
+});
+
+// 404 handler for undefined routes
+app.use((req, res) => {
+    return res.status(404).json({
+        success: false,
+        message: `Route ${req.originalUrl} not found`,
+        errors: [],
+        data: null
+    });
+});
+
+export { app }
 
 // /api/v1/users => good practice
 

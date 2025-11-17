@@ -7,7 +7,7 @@
 
 import {v2 as cloudinary} from "cloudinary";//cloudinary as a variable name here
 import fs from "fs";
-import { ApiError } from "./ApiError";
+import { ApiError } from "./ApiError.js";
 
 //These variables must be set up in your environment to authenticate with Cloudinary.
 

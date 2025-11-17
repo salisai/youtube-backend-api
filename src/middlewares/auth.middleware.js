@@ -14,8 +14,7 @@ export const verifyJWT =asyncHandler(async(req,_,next) =>{//By convention, an un
         //.replace("Bearer ", ""): The replace method is then used to remove the "Bearer " prefix from this string,and replace with "", like nothing, leaving only the JWT itself.
 
         //?. => optional chaining, if any part of the chain is undefined or null it short-circuits and return undefined without throwing an error
-        const token = req.cookies?.accessToken || req.header
-        ("Authorization")?.replace("Bearer ","")
+        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
     
         //its simple
         if (!token) {
@@ -32,7 +31,6 @@ export const verifyJWT =asyncHandler(async(req,_,next) =>{//By convention, an un
     
 
         if(!user){
-            TODO://  discuss about frontend
             throw new ApiError(401, "Invalid access token")
         }
     
